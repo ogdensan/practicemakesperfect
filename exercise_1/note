@@ -1,0 +1,5 @@
+Followed check instructions from: https://bitcoincore.org/en/download/
+Tried using keys from https://github.com/bitcoin/bitcoin/blob/master/contrib/builder-keys/keys.txt
+but kept getting "Can't check signature: No public key" errors
+
+The gpg key import bit is copied from: https://github.com/ruimarinho/docker-bitcoin-core/blob/master/22/Dockerfile

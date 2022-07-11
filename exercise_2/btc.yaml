@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: btc-deployment
+  labels:
+    app: btc-app
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: btc-app
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+  template:
+    metadata:
+      labels:
+        app: btc-app
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+          - podAffinityTerm:
+              labelSelector:
+                matchExpressions:
+                - key: app
+                  operator: In
+                  values:
+                  - btc-app
+              topologyKey: failure-domain.beta.kubernetes.io/zone
+            weight: 100
+      volumes:
+      - name: btc-pv-storage
+        persistentVolumeClaim:
+          claimName: btc-pv-claim
+      containers:
+      - name: btc
+        image: "bitcoin:22.0"
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 8332
+        livenessProbe:
+          tcpSocket:
+            port: 8332
+          initialDelaySeconds: 10
+        volumeMounts:
+        - name: btc-pv-storage
+          mountPath: "/home/btc/.bitcoin"
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+---
+kind: PersistentVolumeClaim
+apiVersion: v1
+metadata:
+  name: btc-pv-claim
+spec:
+  storageClassName: local-path
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: btc-service
+  labels:
+    tier: bitcoin
+spec:
+  selector:
+    app: btc-app
+  ports:
+  - port: 80
+    targetPort: 8332
+    protocol: TCP
+    name: btc-port

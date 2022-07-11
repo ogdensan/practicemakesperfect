@@ -1,0 +1,22 @@
+pipeline {
+  agent any
+  stages {
+    stage('build image') {
+      steps {
+        sh'''
+          git clone 'https://github.com/ogdensan/practicemakesperfect.git'
+          cd practicemakesperfect/exercise_1
+          docker build -t bitcoin:22.0 .
+        '''
+      }
+    }
+    stage('deploy')
+      steps {
+        sh'''
+          cd practicemakesperfect/exercise_2
+          kubectl apply -f btc.yaml
+        '''
+      }
+    }
+  }
+}
