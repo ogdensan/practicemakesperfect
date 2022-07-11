@@ -20,8 +20,6 @@ resource "aws_iam_role" "this" {
 
 resource "aws_iam_policy" "this" {
   name        = "deploy_policy"
-  path        = "/"
-  description = "policy to allow users to assume a certain role"
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [
@@ -30,7 +28,7 @@ resource "aws_iam_policy" "this" {
           "sts:AssumeRole",
         ]
         Effect   = "Allow"
-        Resource = aws_iam_role.this.arn
+        Resource = "${aws_iam_role.this.arn}"
       },
     ]
   })
